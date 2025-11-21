@@ -25,14 +25,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/orders", isAdminMiddleware, orderRoutes);
-// app.use("/api/users", userRouter);
-// ...
+
 
 // Server
 const PORT = Number(process.env.PORT) || 4001;
 
 await sequelize.sync({ alter: false });
-    console.log("✅ All tables created/updated!");
+    console.log("All tables created/updated!");
 
 app.listen(PORT, async () => {
     try {

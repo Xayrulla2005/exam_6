@@ -13,16 +13,18 @@ export enum OrderStatus {
 interface OrderAttributes {
   id: number;
   userId: number;
+  totalPrice: number; 
   status: OrderStatus;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface OrderCreationAttributes extends Optional<OrderAttributes, "id"> {}
+interface OrderCreationAttributes extends Optional<OrderAttributes, "id" | "status" | "totalPrice"> {}
 
 class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
   public id!: number;
   public userId!: number;
+  public totalPrice!: number; 
   public status!: OrderStatus;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -39,6 +41,11 @@ Order.init(
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: { model: User, key: "id" },
+    },
+    totalPrice: { 
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
     },
     status: {
       type: DataTypes.ENUM(...Object.values(OrderStatus)),

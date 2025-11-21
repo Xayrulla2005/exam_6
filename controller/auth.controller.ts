@@ -4,7 +4,6 @@ import { hashPassword, comparePassword } from "../utils/hash.js";
 import { generateToken } from "../utils/token.js";
 import { sendVerificationEmail } from "../utils/email.js";
 
-// Tasodifiy 6 raqamli kod
 const generateVerificationCode = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -14,25 +13,20 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   try {
     const { name, email, password, role } = req.body;
 
-    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Mavjud user tekshirish
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Verification code yaratish
     const verificationCode = generateVerificationCode();
-    const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 daqiqa
+    const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); 
 
-    // Password hash
     const hashedPassword = await hashPassword(password);
 
-    // User yaratish
     const user = await User.create({
       name,
       email,
@@ -48,7 +42,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       await sendVerificationEmail(email, verificationCode);
     } catch (emailError) {
       console.error("Email sending error:", emailError);
-      // User yaratildi lekin email yuborilmadi
       return res.status(201).json({
         message: "User created but email sending failed. Please use resend code.",
         userId: user.id,
@@ -94,13 +87,11 @@ export const verifyEmail = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Verification code expired. Please request a new one." });
     }
 
-    // Verify qilish
     user.isVerified = true;
     user.verificationCode = null;
     user.verificationCodeExpires = null;
     await user.save();
 
-    // Token berish
     const token = generateToken({
       id: user.id,
       email: user.email,
@@ -142,7 +133,6 @@ export const resendVerificationCode = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email already verified" });
     }
 
-    // Yangi kod
     const verificationCode = generateVerificationCode();
     const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
 
